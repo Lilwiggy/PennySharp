@@ -1,0 +1,17 @@
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\PennySharp.exe.config
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\PennySharp.exe
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\PennySharp.pdb
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\DSharpPlus.dll
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\Newtonsoft.Json.dll
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\DSharpPlus.xml
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\Newtonsoft.Json.xml
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\obj\Debug\PennySharp.csprojResolveAssemblyReference.cache
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\obj\Debug\PennySharp.csproj.CoreCompileInputs.cache
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\obj\Debug\PennySharp.exe
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\obj\Debug\PennySharp.pdb
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\DSharpPlus.CommandsNext.dll
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\DSharpPlus.CommandsNext.xml
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\Microsoft.Extensions.DependencyInjection.xml
+C:\Users\John\Desktop\Things\PennySharp (D#+)\PennySharp\bin\Debug\Microsoft.Extensions.DependencyInjection.Abstractions.xml

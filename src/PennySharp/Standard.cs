@@ -36,5 +36,20 @@ namespace PennySharp
             });
         }
 
+        // For those server stats my doggy dude man
+        [Command("serverinfo")]
+        public async Task ServerInfo(CommandContext ctx)
+        {
+            await ctx.Message.Channel.SendMessageAsync("", embed: new DiscordEmbedBuilder()
+            {
+                Title = ctx.Guild.Name,
+                ThumbnailUrl = ctx.Guild.IconUrl,
+                Color = new DiscordColor("89ff89")
+            }.AddField("Guild ID", ctx.Guild.Id.ToString(), true)
+            .AddField("Total members", ctx.Guild.MemberCount.ToString(), true)
+            .AddField("Owner", $"{ctx.Guild.Owner.Mention} | {ctx.Guild.Owner.Id}")
+            .WithFooter($"PennyBot | Lilwiggy {DateTime.UtcNow.Year}"));
+        }
+
     }
 }

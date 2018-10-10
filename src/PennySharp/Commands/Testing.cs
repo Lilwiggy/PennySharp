@@ -10,7 +10,7 @@ using DSharpPlus.Entities;
 
 namespace PennySharp
 {
-    public class TestingCommands
+    public class TestingCommands : BaseCommandModule
     {
         [Command("test")]
         public async Task Test(CommandContext ctx)

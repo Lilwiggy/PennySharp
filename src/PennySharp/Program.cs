@@ -56,6 +56,13 @@ namespace PennySharp
             // Car salesman: *slaps roof of Client* This bad boy can fit so many fucking command modules in it
             commands.RegisterCommands<TestingCommands>();
             commands.RegisterCommands<StandardCommands>();
+
+            // Please just show me errors
+            commands.CommandErrored += async e =>
+            {
+                Console.WriteLine(e.Exception);
+            };
+
             // Connect
             await client.ConnectAsync();
 

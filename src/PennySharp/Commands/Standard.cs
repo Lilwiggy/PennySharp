@@ -40,13 +40,23 @@ namespace PennySharp
         [Command("serverinfo")]
         public async Task ServerInfo(CommandContext ctx)
         {
+            var total = ctx.Guild.Members.Where(x => !x.IsBot).Count();
+            var online = ctx.Guild.Members.Where(x => !x.IsBot && x.Presence?.Status == UserStatus.Online).Count();
+            var dnd = ctx.Guild.Members.Where(x => !x.IsBot && x.Presence?.Status == UserStatus.DoNotDisturb).Count();
+            var idle = ctx.Guild.Members.Where(x => !x.IsBot && x.Presence?.Status == UserStatus.Idle).Count();
+            var offline = total - online - dnd - idle;
             await ctx.Message.Channel.SendMessageAsync("", embed: new DiscordEmbedBuilder()
             {
                 Title = ctx.Guild.Name,
                 ThumbnailUrl = ctx.Guild.IconUrl,
                 Color = new DiscordColor("89ff89")
             }.AddField("Guild ID", ctx.Guild.Id.ToString(), true)
-            .AddField("Total members", ctx.Guild.MemberCount.ToString(), true)
+            .AddField("Member count", $"Total users: {total}\n" +
+            $"<:online:499784465145397258> {online}\n" +
+            $"<:dnd:499778040147083264> {dnd}\n" +
+            $"<:idle:499784448334888960> {idle}\n" +
+            $"<:invisible:499784436276133889> {offline}\n" +
+            $"<:bot:499786409348038686> {ctx.Guild.Members.Where(x => x.IsBot).Count()}", true)
             .AddField("Owner", $"{ctx.Guild.Owner.Mention} | {ctx.Guild.Owner.Id}")
             .WithFooter($"PennyBot | Lilwiggy {DateTime.UtcNow.Year}"));
         }

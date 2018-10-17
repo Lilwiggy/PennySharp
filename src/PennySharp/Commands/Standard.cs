@@ -7,6 +7,8 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
+using PennySharp.Helpers;
 
 namespace PennySharp
 {
@@ -14,7 +16,7 @@ namespace PennySharp
    public class StandardCommands : BaseCommandModule
     {
         // For your own avatar ;)
-        [Command("avatar")]
+        [Command("avatar"), Description("Shows your or someone else's avatar")]
         public async Task Avatar(CommandContext ctx)
         {
                 await ctx.Message.Channel.SendMessageAsync("", embed: new DiscordEmbedBuilder()
@@ -25,7 +27,7 @@ namespace PennySharp
                 });
         }
         // For That other guy's avatar or whatever
-        [Command("avatar")]
+        [Command("avatar"), Description("Shows your or someone else's avatar")]
         public async Task Avatar(CommandContext ctx, [RemainingText] DiscordMember member)
         {
             await ctx.Message.Channel.SendMessageAsync("", embed: new DiscordEmbedBuilder()
@@ -37,7 +39,7 @@ namespace PennySharp
         }
 
         // For those server stats my doggy dude man
-        [Command("serverinfo")]
+        [Command("serverinfo"), Description("Nice server stats and info")]
         public async Task ServerInfo(CommandContext ctx)
         {
             var total = ctx.Guild.Members.Where(x => !x.IsBot).Count();
@@ -59,6 +61,43 @@ namespace PennySharp
             $"<:bot:499786409348038686> {ctx.Guild.Members.Where(x => x.IsBot).Count()}", true)
             .AddField("Owner", $"{ctx.Guild.Owner.Mention} | {ctx.Guild.Owner.Id}")
             .WithFooter($"PennyBot | Lilwiggy {DateTime.UtcNow.Year}"));
+        }
+
+        [Command("help"), Description("Exactly what you think it does.")]
+        public async Task Help(CommandContext ctx)
+        {
+            var interactivity = ctx.Client.GetInteractivity();
+            int i = 0;
+            List<string> Cmds = new List<string>();
+            List<List<string>> c = new List<List<string>>();
+
+            var Commands = ctx.Client.GetCommandsNext();
+            foreach (KeyValuePair<string, Command> cmd in Commands.RegisteredCommands)
+            {
+                if (!cmd.Value.IsHidden)
+                    Cmds.Add(cmd.Key);
+            }
+            for (int j = 0; j < Cmds.Count; j += 5)
+                c.Add(Cmds.Skip(j).Take(j + 5).ToList());
+            var Pages = Math.Ceiling(Cmds.Count / 5.0);
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = "Official server",
+                Url = "https://discord.gg/kwcd9dq",
+                Color = new DiscordColor(9043849)
+            }.WithAuthor($"Page {i + 1}/{Pages}", null, ctx.Client.CurrentUser.AvatarUrl)
+             .WithFooter($"PennyBot | Lilwiggy {DateTime.UtcNow.Year}");
+            foreach (string s in c[i])
+                embed.AddField(s, Commands.RegisteredCommands.Values.ToList().Find(x => x.Name == s).Description);
+
+            var m = await ctx.Channel.SendMessageAsync("", embed: embed);
+            await m.CreateReactionAsync(DiscordEmoji.FromUnicode("⬅"));
+            await m.CreateReactionAsync(DiscordEmoji.FromUnicode("➡"));
+
+            var help = new HelpCommandHelper();
+            help.HelpCommand(ctx, i, m);
+            
+            
         }
 
     }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Interactivity;
 
 namespace PennySharp
 {
@@ -14,6 +15,8 @@ namespace PennySharp
         static DiscordClient client;
         // Our commands
         static CommandsNextExtension commands;
+        // For interactions (this should 100% be named better imo)
+        static InteractivityExtension interactivity;
         static void Main(string[] args)
         {
             MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -51,18 +54,25 @@ namespace PennySharp
                 // Mention the bot for commands as well
                 EnableMentionPrefix = true,
                 // Those prefixes from earlier
-                StringPrefixes = prefixes
+                StringPrefixes = prefixes,
+                // Disable help command in place of our own
+                EnableDefaultHelp = false
             });
+
+            // Why is there no overload for leaving it blank? (it's even shown this way in the docs)
+            interactivity = client.UseInteractivity(new InteractivityConfiguration());
+
             // Car salesman: *slaps roof of Client* This bad boy can fit so many fucking command modules in it
             commands.RegisterCommands<TestingCommands>();
             commands.RegisterCommands<StandardCommands>();
+            commands.RegisterCommands<FunCommands>();
 
             // Please just show me errors
             commands.CommandErrored += async e =>
             {
                 Console.WriteLine(e.Exception);
-            };
 
+            };
             // Connect
             await client.ConnectAsync();
 

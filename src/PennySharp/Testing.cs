@@ -13,12 +13,14 @@ namespace PennySharp
     public class TestingCommands : BaseCommandModule
     {
         [Command("test")]
+        [Hidden()]
         public async Task Test(CommandContext ctx)
         {
             await ctx.Message.Channel.SendMessageAsync($"Sup bitch ass {ctx.User.Mention}");
         }
 
         [Command("embed")]
+        [Hidden()]
         public async Task Embed(CommandContext ctx)
         {
             string[] args = ctx.Message.Content.Split(' ');

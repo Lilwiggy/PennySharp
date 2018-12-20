@@ -96,6 +96,31 @@ namespace PennySharp
             }
         }
 
+        [Command("complain"), Description("Complain about Penny.\n\"I see all of these messages so have fun :)\" - Lilwiggy")]
+        public async Task Complain(CommandContext ctx)
+        {
+            await ctx.Channel.SendMessageAsync("Please leave a complaint next time.");
+        }
+
+        [Command("complain"), Description("Complain about Penny.\n\"I see all of these messages so have fun :)\" - Lilwiggy")]
+        public async Task Complain(CommandContext ctx, [RemainingText] string complaint)
+        {
+            DiscordChannel Channel = await ctx.Client.GetChannelAsync(396008624289349634);
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = "New complaint",
+                Color = new DiscordColor("#80ff8a"),
+                ThumbnailUrl = ctx.User.AvatarUrl
+
+            };
+            embed.AddField($"From {ctx.User.Username} on {ctx.Guild.Name}", $"Channel name: {ctx.Channel.Name}\n" +
+                $"Channel ID: {ctx.Channel.Id}\n" +
+                $"Author ID: {ctx.User.Id}");
+            embed.AddField("Complain:", complaint);
+            await Channel.SendMessageAsync("", false, embed);
+            await ctx.Channel.SendMessageAsync("Thank you for your complaint. It has been reported to the proper authorities.");
+        }
+
         private string RandomImage(Dictionary<ulong, List<string>> WaifuList, CommandContext ctx, List<string> Waifus)
         {
             string img = Waifus[rnd.Next(Waifus.Count)];

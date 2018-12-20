@@ -9,6 +9,8 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using PennySharp.Helpers;
+using System.Drawing;
+using System.IO;
 
 namespace PennySharp
 {
@@ -99,6 +101,59 @@ namespace PennySharp
             
             
         }
+
+        [Command("color"), Description("View a user's color.")]
+        public async Task Color(CommandContext ctx)
+        {
+            var c = ctx.Member.Color;
+            await ctx.Channel.SendMessageAsync($"Your role color is **#{c.R.ToString("X2")}{c.G.ToString("X2")}{c.B.ToString("X2")}**");
+        }
+
+        [Command("color"), Description("View a user's color.")]
+        public async Task Color(CommandContext ctx, [RemainingText] DiscordMember member)
+        {
+            var c = member.Color;
+            await ctx.Channel.SendMessageAsync($"{member.Username}'s role color is **#{c.R.ToString("X2")}{c.G.ToString("X2")}{c.B.ToString("X2")}**");
+        }
+
+        [Command("color"), Description("View a user's color.")]
+        public async Task Color(CommandContext ctx, string hex)
+        {
+            Image img = new Bitmap(100, 100);
+            Graphics drawing = Graphics.FromImage(img);
+            if (hex.StartsWith("#"))
+            {
+                try
+                {
+                    drawing.Clear(ColorTranslator.FromHtml(hex));
+                }
+                catch (Exception)
+                {
+                    await ctx.Channel.SendMessageAsync("Please use a valid hex code.");
+                    return;
+                }
+            }
+            else
+            {
+                try
+                {
+                    drawing.Clear(ColorTranslator.FromHtml($"#{hex}"));
+                }
+                catch (Exception)
+                {
+                    await ctx.Channel.SendMessageAsync("Please use a valid hex code.");
+                    return;
+                }
+            }
+
+            drawing.Save();
+            drawing.Dispose();
+            Stream s = new MemoryStream();
+            img.Save(s, System.Drawing.Imaging.ImageFormat.Png);
+            s.Position = 0;
+            await ctx.Channel.SendFileAsync("color.png", s);
+        }
+
 
     }
 }

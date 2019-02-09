@@ -9,22 +9,24 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using PennySharp.Helpers;
+using System.Drawing;
+using System.IO;
 
 namespace PennySharp
 {
     // Extends BaseCommandModule so you can load in commands from the main file
-   public class StandardCommands : BaseCommandModule
+    public class StandardCommands : BaseCommandModule
     {
         // For your own avatar ;)
         [Command("avatar"), Description("Shows your or someone else's avatar")]
         public async Task Avatar(CommandContext ctx)
         {
-                await ctx.Message.Channel.SendMessageAsync("", embed: new DiscordEmbedBuilder()
-                {
-                    Title = "Your avatar",
-                    ImageUrl = ctx.Member.AvatarUrl,
-                    Color = ctx.Member.Color
-                });
+            await ctx.Message.Channel.SendMessageAsync("", embed: new DiscordEmbedBuilder()
+            {
+                Title = "Your avatar",
+                ImageUrl = ctx.Member.AvatarUrl,
+                Color = ctx.Member.Color
+            });
         }
         // For That other guy's avatar or whatever
         [Command("avatar"), Description("Shows your or someone else's avatar")]
@@ -96,9 +98,135 @@ namespace PennySharp
 
             var help = new HelpCommandHelper();
             help.HelpCommand(ctx, i, m);
-            
-            
+
+
         }
 
+        [Command("color"), Description("View a user's color.")]
+        public async Task Color(CommandContext ctx)
+        {
+            var c = ctx.Member.Color;
+            await ctx.Channel.SendMessageAsync($"Your role color is **#{c.R.ToString("X2")}{c.G.ToString("X2")}{c.B.ToString("X2")}**");
+        }
+
+        [Command("color"), Description("View a user's color.")]
+        public async Task Color(CommandContext ctx, [RemainingText] DiscordMember member)
+        {
+            var c = member.Color;
+            await ctx.Channel.SendMessageAsync($"{member.Username}'s role color is **#{c.R.ToString("X2")}{c.G.ToString("X2")}{c.B.ToString("X2")}**");
+        }
+
+        [Command("color"), Description("View a user's color.")]
+        public async Task Color(CommandContext ctx, string hex)
+        {
+            Image img = new Bitmap(100, 100);
+            Graphics drawing = Graphics.FromImage(img);
+            if (hex.StartsWith("#"))
+            {
+                try
+                {
+                    drawing.Clear(ColorTranslator.FromHtml(hex));
+                }
+                catch (Exception)
+                {
+                    await ctx.Channel.SendMessageAsync("Please use a valid hex code.");
+                    return;
+                }
+            }
+            else
+            {
+                try
+                {
+                    drawing.Clear(ColorTranslator.FromHtml($"#{hex}"));
+                }
+                catch (Exception)
+                {
+                    await ctx.Channel.SendMessageAsync("Please use a valid hex code.");
+                    return;
+                }
+            }
+
+            drawing.Save();
+            drawing.Dispose();
+            Stream s = new MemoryStream();
+            img.Save(s, System.Drawing.Imaging.ImageFormat.Png);
+            s.Position = 0;
+            await ctx.Channel.SendFileAsync("color.png", s);
+        }
+
+        [Command("invite"), Description("Gives an invite link to Penny.")]
+        public async Task Invite(CommandContext ctx)
+        {
+            await ctx.Channel.SendMessageAsync("I'm combat ready! <https://discordapp.com/oauth2/authorize?client_id=309531399789215744&scope=bot&permissions=36809798>");
+        }
+
+        [Command("listening"), Description("Shows what you're listening to.")]
+        public async Task Listening(CommandContext ctx)
+        {
+            if (ctx.User.Presence.Activity.ActivityType == ActivityType.ListeningTo && ctx.User.Presence.Activity.Name == "Spotify")
+            {
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = ctx.User.Presence.Activity.RichPresence.Details,
+                    Description = $"By: {ctx.User.Presence.Activity.RichPresence.State}\nAlbum: {ctx.User.Presence.Activity.RichPresence.LargeImageText}",
+                    Color = new DiscordColor("#1ed760"),
+                    ThumbnailUrl = ctx.User.Presence.Activity.RichPresence.LargeImage.Url.ToString()
+                };
+                GetListening(ctx, embed);
+                await ctx.Channel.SendMessageAsync("", false, embed);
+            }
+            else
+            {
+                await ctx.Channel.SendMessageAsync("You aren't listening to anything.");
+            }
+        }
+
+        private static void GetListening(CommandContext ctx, DiscordEmbedBuilder embed)
+        {
+            List<string> album = new List<string>();
+            List<string> artist = new List<string>();
+            List<string> listening = new List<string>();
+
+            DiscordRichPresence userPresence = ctx.User.Presence.Activity.RichPresence;
+
+            foreach (DiscordMember member in ctx.Guild.Members)
+            {
+                if (member.Presence == null || member.Presence.Activity == null || member.Presence.Activity.RichPresence == null)
+                    continue;
+                DiscordRichPresence presence = member.Presence.Activity.RichPresence;
+
+                if (member.Presence.Activity.ActivityType != ActivityType.ListeningTo || member.IsBot || member.Id == ctx.User.Id)
+                    continue;
+
+                if (userPresence.Details == presence.Details)
+                    listening.Add(member.Username);
+                else if (userPresence.LargeImageText == presence.LargeImageText)
+                    album.Add(member.Username);
+                else if (userPresence.State == presence.State)
+                    artist.Add(member.Username);
+            }
+
+            if (listening.Count > 0)
+            {
+                if (listening.Count == 1)
+                    embed.AddField($"Listening with {listening.Count} other.", string.Join(", ", listening));
+                else
+                    embed.AddField($"Listening with {listening.Count} others.", string.Join(", ", listening));
+            }
+            else if (album.Count > 0)
+            {
+                if (album.Count > 1)
+                    embed.AddField($"{album.Count} others are listening to this album.", string.Join(", ", album));
+                else
+                    embed.AddField($"{album.Count} other is listening to this album.", string.Join(", ", album));
+            }
+            else if (artist.Count > 0)
+            {
+                if (artist.Count > 1)
+                    embed.AddField($"{artist.Count} others are listening to this artist.", string.Join(", ", artist));
+                else
+                    embed.AddField($"{artist.Count} other is listening to this artist.", string.Join(", ", artist));
+            }
+        }
     }
 }

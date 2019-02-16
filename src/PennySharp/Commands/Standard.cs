@@ -90,17 +90,45 @@ namespace PennySharp
             }.WithAuthor($"Page {i + 1}/{Pages}", null, ctx.Client.CurrentUser.AvatarUrl)
              .WithFooter($"PennyBot | Lilwiggy {DateTime.UtcNow.Year}");
             foreach (string s in c[i])
+            {
+               // Console.WriteLine(s);
+               // Console.WriteLine(c[i]);
                 embed.AddField(s, Commands.RegisteredCommands.Values.ToList().Find(x => x.Name == s).Description);
+            }
 
             var m = await ctx.Channel.SendMessageAsync("", embed: embed);
             await m.CreateReactionAsync(DiscordEmoji.FromUnicode("⬅"));
             await m.CreateReactionAsync(DiscordEmoji.FromUnicode("➡"));
 
             var help = new HelpCommandHelper();
-            help.HelpCommand(ctx, i, m);
+
+            while (true) {
+                var em = await interactivity.WaitForReactionAsync(e => e == DiscordEmoji.FromUnicode("➡") || e == DiscordEmoji.FromUnicode("⬅"), ctx.User, TimeSpan.FromMinutes(3));
+                if (em == null) break;
+                if (em.Emoji == DiscordEmoji.FromUnicode("➡"))
+                {
+                    if (i == Pages - 1)
+                        i = 0;
+                    else
+                        i++;
+                }
+                else if (em.Emoji == DiscordEmoji.FromUnicode("⬅"))
+                {
+                    if (i == 0)
+                        i = Convert.ToInt32(Pages) - 1;
+                    else
+                        i--;
+                }
+                Console.WriteLine("hi");
+                await m.DeleteReactionAsync(em.Emoji, ctx.User);
+                var emb = help.GetCommandsEmbed(ctx, i, m);
+                Console.WriteLine(emb.Fields[0].Value);
+                await m.ModifyAsync("", emb);
+            };
 
 
         }
+
 
         [Command("color"), Description("View a user's color.")]
         public async Task Color(CommandContext ctx)
@@ -163,8 +191,12 @@ namespace PennySharp
         [Command("listening"), Description("Shows what you're listening to.")]
         public async Task Listening(CommandContext ctx)
         {
-            if (ctx.User.Presence.Activity.ActivityType == ActivityType.ListeningTo && ctx.User.Presence.Activity.Name == "Spotify")
+            if (ctx.User.Presence.Activity.ActivityType != ActivityType.ListeningTo && ctx.User.Presence.Activity.Name != "Spotify")
             {
+                await ctx.Channel.SendMessageAsync("You aren't listening to anything.");
+                return;
+            }
+
                 var embed = new DiscordEmbedBuilder
                 {
                     Title = ctx.User.Presence.Activity.RichPresence.Details,
@@ -172,22 +204,37 @@ namespace PennySharp
                     Color = new DiscordColor("#1ed760"),
                     ThumbnailUrl = ctx.User.Presence.Activity.RichPresence.LargeImage.Url.ToString()
                 };
-                GetListening(ctx, embed);
+                GetListening(ctx, embed, ctx.Member);
                 await ctx.Channel.SendMessageAsync("", false, embed);
-            }
-            else
-            {
-                await ctx.Channel.SendMessageAsync("You aren't listening to anything.");
-            }
         }
 
-        private static void GetListening(CommandContext ctx, DiscordEmbedBuilder embed)
+        [Command("listening"), Description("Shows what you're listening to.")]
+        public async Task Listening(CommandContext ctx, DiscordMember Member)
+        {
+            if (ctx.User.Presence.Activity.ActivityType != ActivityType.ListeningTo && ctx.User.Presence.Activity.Name != "Spotify")
+            {
+                await ctx.Channel.SendMessageAsync($"{Member.Username} isn't listening to anything.");
+                return;
+            }
+
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = ctx.User.Presence.Activity.RichPresence.Details,
+                Description = $"By: {ctx.User.Presence.Activity.RichPresence.State}\nAlbum: {ctx.User.Presence.Activity.RichPresence.LargeImageText}",
+                Color = new DiscordColor("#1ed760"),
+                ThumbnailUrl = ctx.User.Presence.Activity.RichPresence.LargeImage.Url.ToString()
+            };
+            GetListening(ctx, embed, Member);
+            await ctx.Channel.SendMessageAsync("", false, embed);
+        }
+
+        private static void GetListening(CommandContext ctx, DiscordEmbedBuilder embed, DiscordMember Member)
         {
             List<string> album = new List<string>();
             List<string> artist = new List<string>();
             List<string> listening = new List<string>();
 
-            DiscordRichPresence userPresence = ctx.User.Presence.Activity.RichPresence;
+            DiscordRichPresence userPresence = Member.Presence.Activity.RichPresence;
 
             foreach (DiscordMember member in ctx.Guild.Members)
             {
@@ -195,7 +242,7 @@ namespace PennySharp
                     continue;
                 DiscordRichPresence presence = member.Presence.Activity.RichPresence;
 
-                if (member.Presence.Activity.ActivityType != ActivityType.ListeningTo || member.IsBot || member.Id == ctx.User.Id)
+                if (member.Presence.Activity.ActivityType != ActivityType.ListeningTo || member.IsBot || member.Id == Member.Id)
                     continue;
 
                 if (userPresence.Details == presence.Details)

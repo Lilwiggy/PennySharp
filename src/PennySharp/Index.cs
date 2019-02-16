@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
+using System.IO;
 
 namespace PennySharp
 {
-    class Program
+    class Index
     {
         // Our little baby boy
         static DiscordClient client;
@@ -23,12 +24,22 @@ namespace PennySharp
         }
 
 
+        static void LoadCommands(CommandsNextExtension commands)
+        {
+            DirectoryInfo d = new DirectoryInfo(@"./Commands");
+            FileInfo[] Files = d.GetFiles("*.cs");
+            foreach (FileInfo file in Files)
+            {
+                
+            }
+        }
+
         static async Task MainAsync(string[] args)
         {
             client = new DiscordClient(new DiscordConfiguration
             {
                 // Please for the love of all that is holy don't include this in the GitHub
-                Token = "Get your own token :(",
+                Token = "",
                 TokenType = TokenType.Bot,
                 UseInternalLogHandler = true,
                 // LogLevel.Debug for Debugguging info, LogLevel.Error for errors
@@ -64,6 +75,7 @@ namespace PennySharp
 
             // Car salesman: *slaps roof of Client* This bad boy can fit so many fucking command modules in it
             commands.RegisterCommands<TestingCommands>();
+            commands.RegisterCommands<ModerationCommands>();
             commands.RegisterCommands<StandardCommands>();
             commands.RegisterCommands<FunCommands>();
 
